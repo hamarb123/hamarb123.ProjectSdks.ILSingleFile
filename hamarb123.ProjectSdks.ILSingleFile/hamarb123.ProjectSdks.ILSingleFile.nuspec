@@ -9,6 +9,7 @@
 			A .NET Project SDK to enable running IL files with dotnet run app.cs.
 		</description>
 		<copyright>Copyright © Hamish Arblaster 2025</copyright>
+		<repository type="git" url="https://github.com/hamarb123/hamarb123.ProjectSdks.ILSingleFile" />
 		<packageTypes>
 			<packageType name="MSBuildSdk"/>
 		</packageTypes>
