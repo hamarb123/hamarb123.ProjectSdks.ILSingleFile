@@ -1,0 +1,19 @@
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+	<metadata>
+		<id>hamarb123.ProjectSdks.ILSingleFile</id>
+		<version>10.0.0-rc.1</version>
+		<authors>hamarb123</authors>
+		<requireLicenseAcceptance>true</requireLicenseAcceptance>
+		<license type="expression">MIT</license>
+		<description>
+			A .NET Project SDK to enable running IL files with dotnet run app.cs.
+		</description>
+		<copyright>Copyright © Hamish Arblaster 2025</copyright>
+		<packageTypes>
+			<packageType name="MSBuildSdk"/>
+		</packageTypes>
+	</metadata>
+	<files>
+		<file src="Sdk\**\*" target="Sdk"/>
+	</files>
+</package>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<PropertyGroup>
+		<IlasmFlags Condition="'$(EnableFold)' == 'true'">$(IlasmFlags) -FOLD</IlasmFlags>
+		<IlasmFlags Condition="'$(EnableOptimize)' == 'true'">$(IlasmFlags) -OPTIMIZE</IlasmFlags>
+		<IlasmFlags>$(IlasmFlags) -DEBUG=$(DebugOptimization) $(ExtraIlasmFlags)</IlasmFlags>
+	</PropertyGroup>
+
+	<UsingTask TaskName="ConvertCsToIlTask" TaskFactory="RoslynCodeTaskFactory" AssemblyName="Microsoft.Build.Tasks.Core">
+		<ParameterGroup>
+			<Files ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Using Namespace="System" />
+			<Using Namespace="System.IO" />
+			<Using Namespace="System.Linq" />
+			<Using Namespace="System.Text.RegularExpressions" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
+				var success = true;
+				foreach (var item in Files)
+				{
+					var originalPath = item.GetMetadata("OriginalPath");
+					var outputPath = item.ItemSpec;
+					var content = File.ReadAllText(originalPath);
+					var matches = Regex.Matches(content, "^([\\s\\S]*_[\\s|\\n|\\r]*=[\\s|\\n|\\r]*((\"{3,})\\s*(\\n|\\r)))([\\s\\S]*)(\\n|\\r)\\s*\\3\\s*;[\\s\\S]*$");
+					if (matches.Count == 0)
+					{
+						Console.WriteLine("File '" + originalPath + "' has malformed IL string - file should contain a single discarded multi-line string, e.g., '_ = \"\"\"' {content over lines} '\"\"\"'.");
+						success = false;
+						continue;
+					}
+					else if (matches.Count > 1)
+					{
+						Console.WriteLine("File '" + originalPath + "' has multiple IL strings - file should contain a single discarded multi-line string, e.g., '_ = \"\"\"' {content over lines} '\"\"\"'.");
+						success = false;
+						continue;
+					}
+					var before = matches[0].Groups[1].Value;
+					var processed = matches[0].Groups[5].Value;
+					processed = string.Join("", before.Split(new string[] { "\r\n", "\n", "\r" }, StringSplitOptions.None).Skip(1).Select((x) => "\r\n")) + processed;
+					Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+					File.WriteAllText(outputPath, processed);
+				}
+				return success;
+				]]>
+			</Code>
+		</Task>
+	</UsingTask>
+
+	<Target Name="PrepareConvertCsFilesToIl">
+
+		<ItemGroup>
+			<_CompileTemp Remove="@(_CompileTemp)" />
+			<_CompileTemp Include="@(Compile)" Condition=" '%(Compile.Extension)' != '.il' " />
+			<Compile Remove="@(_CompileTemp)" />
+		</ItemGroup>
+
+		<ItemGroup>
+			<_CompileTemp1 Include="@(_CompileTemp)" OriginalPath="%(FullPath)">
+				<NewPath>$([System.IO.Path]::Combine('$(ArtifactsPath)', 'obj', 'il', $([System.IO.Path]::GetRelativePath('$(MSBuildProjectDirectory)', '%(FullPath)'))))</NewPath>
+			</_CompileTemp1>
+			<_CompileTemp2 Include="@(_CompileTemp1->'%(NewPath).il')" OriginalPath="%(OriginalPath)" />
+		</ItemGroup>
+
+		<ItemGroup>
+			<Compile Include="@(_CompileTemp2)" />
+			<FileWrites Include="@(_CompileTemp2)" />
+		</ItemGroup>
+
+		<!-- Workaround for https://github.com/dotnet/runtime/pull/120146 -->
+		<ItemGroup>
+			<_CompileTemp1 Remove="@(_CompileTemp1)" />
+			<_CompileTemp1 Include="@(Compile->'&quot;%(Identity)&quot;')" />
+			<Compile Remove="@(Compile)" />
+			<Compile Include="@(_CompileTemp1)" />
+		</ItemGroup>
+
+	</Target>
+
+	<Target Name="ConvertCsFilesToIl" DependsOnTargets="PrepareConvertCsFilesToIl" Inputs="@(_CompileTemp)" Outputs="@(_CompileTemp2)">
+		<ConvertCsToIlTask Files="@(_CompileTemp2)" />
+	</Target>
+
+	<PropertyGroup>
+		<LanguageTargets>$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.IL.Common.targets</LanguageTargets>
+	</PropertyGroup>
+
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.IL" Version="10.0.0-rc.1.25451.107" />
+
+</Project>

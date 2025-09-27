@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.IL" Version="10.0.0-rc.1.25451.107" />
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<DebugOptimization>IMPL</DebugOptimization>
+		<DebugOptimization Condition=" '$(Configuration)' == 'Release' ">OPT</DebugOptimization>
+		<CoreCompileDependsOn>$(CoreCompileDependsOn);PrepareConvertCsFilesToIl;ConvertCsFilesToIl</CoreCompileDependsOn>
+		<PublishAot>false</PublishAot>
+		<NoWarn>$(NoWarn),CS0162</NoWarn>
+		<EnableFold>true</EnableFold>
+		<EnableOptimize>true</EnableOptimize>
+		<ExtraIlasmFlags></ExtraIlasmFlags>
+	</PropertyGroup>
+
+</Project>
