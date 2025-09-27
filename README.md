@@ -6,11 +6,11 @@ NuGet link:
 
 To make it work, you need to write your C# file like so - the project processor uses pattern matching to find the multi-line raw string literal:
 ```csharp
-// Fibonacci.cs:
-// Example usage (when marked executable on unix): ./Fibonacci.cs 20 --> 6765
-
 #!/usr/bin/dotnet run
 #:sdk hamarb123.ProjectSdks.ILSingleFile@10.0.0-rc.1
+
+// Fibonacci.cs:
+// Example usage (when marked executable on unix): ./Fibonacci.cs 20 --> 6765
 
 _ = """
 .assembly extern System.Runtime { }
