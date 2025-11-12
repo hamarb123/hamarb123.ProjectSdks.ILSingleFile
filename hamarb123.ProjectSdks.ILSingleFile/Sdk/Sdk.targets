@@ -87,6 +87,6 @@
 		<LanguageTargets>$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.IL.Common.targets</LanguageTargets>
 	</PropertyGroup>
 
-	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.IL" Version="10.0.0-rc.1.25451.107" />
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.IL" Version="10.0.0" />
 
 </Project>
