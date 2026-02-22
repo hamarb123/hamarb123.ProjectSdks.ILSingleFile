@@ -6,7 +6,7 @@ NuGet link:
 
 To make it work, you need to write your C# file like so - the project processor uses pattern matching to find the multi-line raw string literal:
 ```csharp
-#!/usr/bin/env dotnet run
+#!/usr/bin/env dotnet run --file
 #:sdk hamarb123.ProjectSdks.ILSingleFile@10.0.0
 
 // Fibonacci.cs:
